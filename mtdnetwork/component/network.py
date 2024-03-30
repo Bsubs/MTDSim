@@ -609,6 +609,7 @@ class Network:
         """
         self.scorer.add_attack_path_exposure(self.attack_path_exposure())
 
+
     def attack_path_exposure(self):
         """
         Gets the total attack path exposure, scoring each node based on the % of new vulnerabilities found in each node on the shortest path to the target_node out of 1

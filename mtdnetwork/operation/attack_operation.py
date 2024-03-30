@@ -6,7 +6,7 @@ from mtdnetwork.data.constants import ATTACK_DURATION
 
 
 class AttackOperation:
-    def __init__(self, env, end_event, adversary, proceed_time=0):
+    def __init__(self, env, end_event, adversary, network,proceed_time=0):
         """
 
         :param env: the parameter to facilitate simPY env framework
@@ -20,6 +20,7 @@ class AttackOperation:
         self._attack_process = None
         self._interrupted_mtd = None
         self._proceed_time = proceed_time
+        self._network = network
         self.logging = False
 
     def proceed_attack(self):
@@ -236,6 +237,7 @@ class AttackOperation:
         user_reuse = adversary.get_curr_host().can_auto_compromise_with_users(
             adversary.get_compromised_users())
         if user_reuse:
+            self._network.get_scorer().add_host_reuse_pass_compromise(self.env.now, adversary.get_curr_host())
             self.update_compromise_progress(self.env.now, self._proceed_time)
             self._scan_neighbors()
             return
@@ -272,15 +274,20 @@ class AttackOperation:
             vuln.network(host=adversary.get_curr_host())
             # cumulative vulnerability exploitation attempts
             adversary.set_curr_attempts(adversary.get_curr_attempts() + 1)
+
         if adversary.get_curr_host().check_compromised():
             for vuln in adversary.get_curr_vulns():
                 if vuln.is_exploited():
+
                     if vuln.exploitability == vuln.cvss / 5.5:
+  
                         vuln.exploitability = (1 - vuln.exploitability) / 2 + vuln.exploitability
                         if vuln.exploitability > 1:
                             vuln.exploitability = 1
                         # todo: record vulnerability roa, impact, and complexity
-                        # self.scorer.add_vuln_compromise(self.curr_time, vuln)
+                        self._network.get_scorer().add_host_vuln_compromise(self.env.now, adversary.get_curr_host())
+                        self._network.get_scorer().add_vuln_compromise(self.env.now, vuln)
+                        
             self.update_compromise_progress(self.env.now, self._proceed_time)
             self._scan_neighbors()
         else:
@@ -292,10 +299,12 @@ class AttackOperation:
         Checks if credentials for a user account has been successfully compromised.
         Phase 3
         """
+
         adversary = self.adversary
         _brute_force_result = adversary.get_curr_host().compromise_with_users(
             adversary.get_compromised_users())
         if _brute_force_result:
+
             self.update_compromise_progress(self.env.now, self._proceed_time)
             self._scan_neighbors()
         else:
@@ -340,6 +349,7 @@ class AttackOperation:
         if adversary.get_curr_host_id() not in adversary.get_compromised_hosts():
             adversary.get_compromised_hosts().append(adversary.get_curr_host_id())
             adversary.get_attack_stats().update_compromise_host(adversary.curr_host)
+            self._network.get_scorer().add_host_compromise(now, adversary.curr_host)
             if self.logging:
                 logging.info(
                 "Adversary: Host %i has been compromised at %.1fs!" % (

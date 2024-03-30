@@ -260,10 +260,9 @@ def execute_simulation(start_time=0, finish_time=None, scheme='random', mtd_inte
         adversary = Adversary(network=time_network, attack_threshold=ATTACKER_THRESHOLD)
         # snapshot_checkpoint.save_initialised(time_network, adversary)
         snapshot_checkpoint.save_snapshots_by_network_size(time_network, adversary)
-    # logging.info("Hello")
-    # print(time_network.get_scorer().mtd_statistics)
+
     # start attack
-    attack_operation = AttackOperation(env=env, end_event=end_event, adversary=adversary, proceed_time=0)
+    attack_operation = AttackOperation(env=env, end_event=end_event, adversary=adversary, network=time_network,proceed_time=0)
     attack_operation.proceed_attack()
 
     # start mtd
@@ -294,7 +293,7 @@ def execute_simulation(start_time=0, finish_time=None, scheme='random', mtd_inte
     try:
         # Get the actual data from the simulation
         data = evaluation._network.get_scorer().get_statistics()
-
+     
         # Iterate through the key-value pairs and log them
         for i, x in data.items():
             logging.info(f"{i}: {x}")  # Use f-strings for cleaner formatting
