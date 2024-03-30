@@ -70,14 +70,14 @@ class MTDOperation:
             compromised_num = evaluation.compromised_num()
             # evaluation_results = evaluation.evaluation_result_by_compromise_checkpoint()
 
-            logging.info(f"STATS BEFORE MTD OPERATION")
-            # logging.info(f"MTD Stats: {mtd_stats}")
-            logging.info(f"Current Attack: {current_attack}")
-            # logging.info(f"Attack Stats: {attack_stats}")
-            # logging.info(f"Compromised Hosts: {compromised_hosts}")
-            logging.info(f"MTD Frequency: {mtd_freq}")
-            logging.info(f"Compromised Number: {compromised_num}")
-            # logging.info(f"Evaluation Results: {evaluation_results}")
+            # logging.info(f"STATS BEFORE MTD OPERATION")
+            # # logging.info(f"MTD Stats: {mtd_stats}")
+            # logging.info(f"Current Attack: {current_attack}")
+            # # logging.info(f"Attack Stats: {attack_stats}")
+            # # logging.info(f"Compromised Hosts: {compromised_hosts}")
+            # logging.info(f"MTD Frequency: {mtd_freq}")
+            # logging.info(f"Compromised Number: {compromised_num}")
+            # # logging.info(f"Evaluation Results: {evaluation_results}")
 
 
             # register an MTD
@@ -89,9 +89,9 @@ class MTDOperation:
             else:
                 mtd = self._mtd_scheme.trigger_mtd()
            
-            if self.logging:
-                logging.info('MTD: %s triggered %.1fs' % (mtd.get_name(), self.env.now + self._proceed_time))
-            logging.info('MTD: %s triggered %.1fs' % (mtd.get_name(), self.env.now + self._proceed_time))
+            # if self.logging:
+            #     logging.info('MTD: %s triggered %.1fs' % (mtd.get_name(), self.env.now + self._proceed_time))
+            # logging.info('MTD: %s triggered %.1fs' % (mtd.get_name(), self.env.now + self._proceed_time))
 
             resource = self._get_mtd_resource(mtd)
             if len(resource.users) == 0:
@@ -102,9 +102,9 @@ class MTDOperation:
                 if mtd.get_priority() not in self.network.get_suspended_mtd():
                     self._mtd_scheme.suspend_mtd(mtd)
 
-                    if self.logging:
-                        logging.info('MTD: %s suspended at %.1fs due to resource occupation' %
-                                 (mtd.get_name(), self.env.now + self._proceed_time))
+                    # if self.logging:
+                    #     logging.info('MTD: %s suspended at %.1fs due to resource occupation' %
+                    #              (mtd.get_name(), self.env.now + self._proceed_time))
 
             # exponential time interval for triggering MTD operations
             yield self.env.timeout(exponential_variates(self._mtd_scheme.get_mtd_trigger_interval(),
@@ -205,10 +205,10 @@ class MTDOperation:
                 self.attack_operation.set_interrupted_mtd(mtd)
                 self.attack_operation.get_attack_process().interrupt()
                 
-                if logging:
-                    logging.info(
-                    'MTD: Interrupted %s at %.1fs!' % (self.attack_operation.get_adversary().get_curr_process(),
-                                                       env.now + self._proceed_time))
+                # if logging:
+                #     logging.info(
+                #     'MTD: Interrupted %s at %.1fs!' % (self.attack_operation.get_adversary().get_curr_process(),
+                #                                        env.now + self._proceed_time))
                 self.network.get_mtd_stats().add_total_attack_interrupted()
             elif mtd.get_resource_type() == 'application' and \
                     self.attack_operation.get_adversary().get_curr_process() not in [
@@ -218,10 +218,10 @@ class MTDOperation:
                 self.attack_operation.set_interrupted_mtd(mtd)
                 self.attack_operation.get_attack_process().interrupt()
 
-                if self.logging:
-                    logging.info(
-                    'MTD: Interrupted %s at %.1fs!' % (self.attack_operation.get_adversary().get_curr_process(),
-                                                       env.now + self._proceed_time))
+                # if self.logging:
+                #     logging.info(
+                #     'MTD: Interrupted %s at %.1fs!' % (self.attack_operation.get_adversary().get_curr_process(),
+                #                                        env.now + self._proceed_time))
                     
                 self.network.get_mtd_stats().add_total_attack_interrupted()
 

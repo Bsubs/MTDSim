@@ -255,10 +255,13 @@ def execute_simulation(start_time=0, finish_time=None, scheme='random', mtd_inte
                                    total_subnets=total_subnets, total_layers=total_layers,
                                    target_layer=target_layer, total_database=total_database,
                                    terminate_compromise_ratio=terminate_compromise_ratio)
+
+        
         adversary = Adversary(network=time_network, attack_threshold=ATTACKER_THRESHOLD)
         # snapshot_checkpoint.save_initialised(time_network, adversary)
         snapshot_checkpoint.save_snapshots_by_network_size(time_network, adversary)
-
+    # logging.info("Hello")
+    # print(time_network.get_scorer().mtd_statistics)
     # start attack
     attack_operation = AttackOperation(env=env, end_event=end_event, adversary=adversary, proceed_time=0)
     attack_operation.proceed_attack()
@@ -280,7 +283,29 @@ def execute_simulation(start_time=0, finish_time=None, scheme='random', mtd_inte
     else:
         env.run(until=end_event)
     evaluation = Evaluation(network=time_network, adversary=adversary)
+    # data = pd.DataFrame(evaluation._network.get_scorer().get_statistics())
 
+
+
+
+
+
+
+    try:
+        # Get the actual data from the simulation
+        data = evaluation._network.get_scorer().get_statistics()
+
+        # Iterate through the key-value pairs and log them
+        for i, x in data.items():
+            logging.info(f"{i}: {x}")  # Use f-strings for cleaner formatting
+            logging.info('')  # Add a blank line for readability
+
+    except Exception as e:
+        logging.exception("Error occurred:", e)
+        print("An error occurred while retrieving or saving data. Please check the log file for details.")
+
+    
+    
     # sim_item = scheme
     # if scheme == 'single':
     #     sim_item = custom_strategies().get_name()

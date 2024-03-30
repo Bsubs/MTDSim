@@ -77,6 +77,10 @@ class Network:
         self.target_node = None
         self.target_layer = target_layer
 
+
+
+
+
     def init_network(self):
         self.assign_tags()
         self.assign_tag_priority()
