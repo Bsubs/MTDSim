@@ -70,7 +70,7 @@ class Network:
         self.service_count = {}
         self.total_vulns = 0
         self.total_services = 0
-        self.scorer = Scorer()
+        self.scorer = Scorer(self.exposed_endpoints)
         self.users_to_nodes_ratio = users_to_nodes_ratio
         self.prob_user_reuse_pass = prob_user_reuse_pass
 

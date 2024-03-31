@@ -126,14 +126,14 @@ class MTDStatistics(Statistics):
 
 class Scorer:
 
-    def __init__(self):
+    def __init__(self, exposed_endpoints):
         self.host_compromises = CompromiseStatistics("Host Compromises")
         self.host_vuln_compromises = CompromiseStatistics("Vuln Compromises")
         self.host_reuse_pass_compromises = CompromiseStatistics("Reuse Password Compromises")
         self.host_pass_spray_compromises = CompromiseStatistics("Password Spray Compromises")
         self.user_account_leaks = Statistics("User Account Has Been Leaked By Compromise")
         self.attack_path_exposure = []
-
+        self.exposed_endpoints = exposed_endpoints
         # Gather statistics on the types of vulnerabilities that were exploited
         # eg. RoA score, impact and complexity
         self.vuln_compromises = VulnStatistics("Vulnerabilities Exploited")
@@ -265,6 +265,7 @@ class Scorer:
         self.stats["Average Initial RoA Per OS"] = avg_roa_per_os
         self.stats["OS Types In Initial Network"] = os_types_in_network
         self.stats["Initial Hosts Without Vulnerabilities"] = hosts_without_vulns
+        self.stats["Exposed endpoints"] = len(self.exposed_endpoints)
 
     def get_statistics(self):
         stats = self.stats
