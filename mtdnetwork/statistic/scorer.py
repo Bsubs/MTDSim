@@ -259,13 +259,13 @@ class Scorer:
                 vulns_per_os[host_os][host_os_type] = len(roa_list)
                 avg_roa_per_os[host_os][host_os_type] = sum(roa_list) / len(roa_list)
 
-        self.stats["Total Initial Vulnerabilities (Sum of all Vulns on all hosts)"] = total_vulns
-        self.stats["Total Unique Vulnerabilities"] = len(network.get_vuln_dict())
-        self.stats["Initial Vulns Per OS (Sum of all Vulns on those OS)"] = vulns_per_os
-        self.stats["Average Initial RoA Per OS"] = avg_roa_per_os
-        self.stats["OS Types In Initial Network"] = os_types_in_network
-        self.stats["Initial Hosts Without Vulnerabilities"] = hosts_without_vulns
-        self.stats["Exposed endpoints"] = len(self.exposed_endpoints)
+        # self.stats["Total Initial Vulnerabilities (Sum of all Vulns on all hosts)"] = total_vulns
+        # self.stats["Total Unique Vulnerabilities"] = len(network.get_vuln_dict())
+        # self.stats["Initial Vulns Per OS (Sum of all Vulns on those OS)"] = vulns_per_os
+        # self.stats["Average Initial RoA Per OS"] = avg_roa_per_os
+        # self.stats["OS Types In Initial Network"] = os_types_in_network
+        # self.stats["Initial Hosts Without Vulnerabilities"] = hosts_without_vulns
+        # self.stats["Exposed endpoints"] = len(self.exposed_endpoints)
 
     def get_statistics(self):
         stats = self.stats
@@ -273,21 +273,21 @@ class Scorer:
         stats["Host Compromises"] = self.host_compromises.get_dict()
         stats["Vuln Compromises"] = self.host_vuln_compromises.get_dict()
         stats["Reuse Password Compromises"] = self.host_reuse_pass_compromises.get_dict()
-        stats["Password Spray Compromises"] = self.host_pass_spray_compromises.get_dict()
-        stats["User Account Leaks"] = self.user_account_leaks.get_dict()
+        # stats["Password Spray Compromises"] = self.host_pass_spray_compromises.get_dict()
+        # stats["User Account Leaks"] = self.user_account_leaks.get_dict()
         stats["Vulnerabilities Exploited"] = self.vuln_compromises.get_dict()
-        stats["MTD Statistics"] = [
-            mtd_statistic.get_dict()
-            for mtd_statistic in self.mtd_statistics
-        ]
-        stats["Total MTD Events"] = sum([
-            mtd_statistic.get_dict()["total events"]
-            for mtd_statistic in self.mtd_statistics
-        ])
-        stats["Total MTD Blocking Hacker Events"] = sum([
-            mtd_statistic.get_dict()["total blocks"]
-            for mtd_statistic in self.mtd_statistics
-        ])
-        stats["Attack Path Exposure Scores"] = self.attack_path_exposure
+        # stats["MTD Statistics"] = [
+        #     mtd_statistic.get_dict()
+        #     for mtd_statistic in self.mtd_statistics
+        # ]
+        # stats["Total MTD Events"] = sum([
+        #     mtd_statistic.get_dict()["total events"]
+        #     for mtd_statistic in self.mtd_statistics
+        # ])
+        # stats["Total MTD Blocking Hacker Events"] = sum([
+        #     mtd_statistic.get_dict()["total blocks"]
+        #     for mtd_statistic in self.mtd_statistics
+        # ])
+        # stats["Attack Path Exposure Scores"] = self.attack_path_exposure
 
         return stats

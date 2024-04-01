@@ -70,14 +70,14 @@ class MTDOperation:
             compromised_num = evaluation.compromised_num()
             # evaluation_results = evaluation.evaluation_result_by_compromise_checkpoint()
 
-            # logging.info(f"STATS BEFORE MTD OPERATION")
-            # # logging.info(f"MTD Stats: {mtd_stats}")
-            # logging.info(f"Current Attack: {current_attack}")
-            # # logging.info(f"Attack Stats: {attack_stats}")
-            # # logging.info(f"Compromised Hosts: {compromised_hosts}")
-            # logging.info(f"MTD Frequency: {mtd_freq}")
-            # logging.info(f"Compromised Number: {compromised_num}")
-            # # logging.info(f"Evaluation Results: {evaluation_results}")
+            logging.info(f"STATS BEFORE MTD OPERATION")
+            # logging.info(f"MTD Stats: {mtd_stats}")
+            logging.info(f"Current Attack: {current_attack}")
+            # logging.info(f"Attack Stats: {attack_stats}")
+            # logging.info(f"Compromised Hosts: {compromised_hosts}")
+            logging.info(f"MTD Frequency: {mtd_freq}")
+            logging.info(f"Compromised Number: {compromised_num}")
+            # logging.info(f"Evaluation Results: {evaluation_results}")
 
 
             # register an MTD
@@ -89,9 +89,9 @@ class MTDOperation:
             else:
                 mtd = self._mtd_scheme.trigger_mtd()
            
-            # if self.logging:
-            #     logging.info('MTD: %s triggered %.1fs' % (mtd.get_name(), self.env.now + self._proceed_time))
-            # logging.info('MTD: %s triggered %.1fs' % (mtd.get_name(), self.env.now + self._proceed_time))
+            if self.logging:
+                logging.info('MTD: %s triggered %.1fs' % (mtd.get_name(), self.env.now + self._proceed_time))
+            logging.info('MTD: %s triggered %.1fs' % (mtd.get_name(), self.env.now + self._proceed_time))
 
             resource = self._get_mtd_resource(mtd)
             if len(resource.users) == 0:
@@ -102,9 +102,23 @@ class MTDOperation:
                 if mtd.get_priority() not in self.network.get_suspended_mtd():
                     self._mtd_scheme.suspend_mtd(mtd)
 
-                    # if self.logging:
-                    #     logging.info('MTD: %s suspended at %.1fs due to resource occupation' %
-                    #              (mtd.get_name(), self.env.now + self._proceed_time))
+                    if self.logging:
+                        logging.info('MTD: %s suspended at %.1fs due to resource occupation' %
+                                 (mtd.get_name(), self.env.now + self._proceed_time))
+
+
+            try:
+                # Get the actual data from the simulation
+                data = self.network.get_scorer().get_statistics()
+            
+                # Iterate through the key-value pairs and log them
+                for i, x in data.items():
+                    logging.info(f"{i}: {x}")  # Use f-strings for cleaner formatting
+
+            except Exception as e:
+                logging.exception("Error occurred:", e)
+                print("An error occurred while retrieving or saving data. Please check the log file for details.")
+
 
             # exponential time interval for triggering MTD operations
             yield self.env.timeout(exponential_variates(self._mtd_scheme.get_mtd_trigger_interval(),

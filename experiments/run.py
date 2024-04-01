@@ -288,21 +288,6 @@ def execute_simulation(start_time=0, finish_time=None, scheme='random', mtd_inte
 
 
 
-
-
-    try:
-        # Get the actual data from the simulation
-        data = evaluation._network.get_scorer().get_statistics()
-     
-        # Iterate through the key-value pairs and log them
-        for i, x in data.items():
-            logging.info(f"{i}: {x}")  # Use f-strings for cleaner formatting
-            logging.info('')  # Add a blank line for readability
-
-    except Exception as e:
-        logging.exception("Error occurred:", e)
-        print("An error occurred while retrieving or saving data. Please check the log file for details.")
-
     
     
     # sim_item = scheme
