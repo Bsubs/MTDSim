@@ -185,7 +185,7 @@ def single_mtd_simulation(file_name, mtd_strategies, checkpoint= 'None', mtd_int
         print(mtd_name)
     return evaluations
 
-def mtd_ai_simulation(file_name,  model, start_time, finish_time, total_nodes, new_network, mtd_interval = [100, 200], network_size = [25, 50, 75, 100]):
+def mtd_ai_simulation(file_name,  model, start_time, finish_time, total_nodes, new_network, mtd_interval = [100, 200], network_size = [25, 50, 75, 100],checkpoints = 'None' ):
     """
     Simulations for single ai mtd
     """
@@ -205,8 +205,10 @@ def mtd_ai_simulation(file_name,  model, start_time, finish_time, total_nodes, n
                 total_nodes=total_nodes,
                 new_network=new_network
             )
-            
-            evaluation_results = evaluation.evaluation_result_by_compromise_checkpoint(np.arange(0.01, 1.01, 0.01))
+            if checkpoints != 'None':
+                evaluation_results = evaluation.evaluation_result_by_compromise_checkpoint(np.arange(checkpoints[0], checkpoints[1], checkpoints[2]))
+            else:
+                evaluation_results = evaluation.evaluation_result_by_compromise_checkpoint(np.arange(0.01, 1.01, 0.01))
             # print(evaluation_results)
             for item in evaluation_results:
             
