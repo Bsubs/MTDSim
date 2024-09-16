@@ -1,6 +1,7 @@
 import logging
 from mtdnetwork.statistic.attack_statistics import AttackStatistics
 from mtdnetwork.data.constants import HACKER_ATTACK_ATTEMPT_MULTIPLER
+import numpy as np
 
 
 class Adversary:
@@ -21,9 +22,16 @@ class Adversary:
         self._curr_attempts = 0
         self.target_compromised = False
         self.observed_changes = {}
-
+        self.attackDictionary = np.load('../mtdnetwork/data/EdgeIIOTSingleAttack.npy', allow_pickle=True)
         self._attack_stats = AttackStatistics()
         self._curr_process = 'SCAN_HOST'
+        # Dataset attack tools
+        self.recycle_attacks = True
+        self.compromisedIps = []
+        self.interruptedAttacks = []
+        self.successfulAttack = []
+        self.unsuccessfulCount = 0
+        self.successfulCount = 0
 
     def swap_hosts_in_compromised_hosts(self, host_id, other_host_id):
         """

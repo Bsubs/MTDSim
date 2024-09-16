@@ -9,6 +9,7 @@ import pandas as pd
 import random
 from mtdnetwork.statistic.security_metric_statistics import SecurityMetricStatistics
 
+#NEEEED TOOO ASKKK ABOUTTT ATTACKK DICT AND THE NUMBER 7
 
 class MTDAIOperation:
 
@@ -50,10 +51,11 @@ class MTDAIOperation:
             'SCAN_NEIGHBOR': 4,
             'EXPLOIT_VULN': 5,
             'BRUTE_FORCE': 6,
+            'CHECK_REACHABLE': 6, 
         }
         self.evaluation = Evaluation(network=network, adversary=adversary,  security_metrics_record = security_metrics_record)
 
-        self.attack_dict = {"SCAN_HOST": 1, "ENUM_HOST": 2, "SCAN_PORT": 3, "EXPLOIT_VULN": 4, "SCAN_NEIGHBOR": 5, "BRUTE_FORCE": 6}
+        self.attack_dict = {"SCAN_HOST": 1, "ENUM_HOST": 2, "SCAN_PORT": 3, "EXPLOIT_VULN": 4, "SCAN_NEIGHBOR": 5, "BRUTE_FORCE": 6, "CHECK_REACHABLE":6 }
 
 
 

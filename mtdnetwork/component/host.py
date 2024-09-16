@@ -675,3 +675,7 @@ class Host:
         #
 
         return shortest_path
+        
+    def get_ip(self):
+        return self.ip
+

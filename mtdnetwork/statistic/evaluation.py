@@ -236,7 +236,7 @@ class Evaluation:
         record = self._attack_record
 
         fig, ax = plt.subplots(1, figsize=(16, 5))
-        colors = ['purple', 'blue', 'green', 'yellow', 'orange', 'red']
+        colors = ['purple', 'blue', 'green', 'yellow', 'orange', 'red', 'black']
         attack_action_legend = []
         attack_action_legend_name = []
         for i, v in enumerate(record['name'].unique()):
@@ -257,7 +257,7 @@ class Evaluation:
         plt.xlabel('Time', weight='bold', fontsize=18)
         plt.ylabel('Hosts', weight='bold', fontsize=18)
         fig.tight_layout()
-        plt.savefig(directory + '/experimental_data/plots/','/attack_action_record_group_by_host.png')
+        plt.savefig(directory + '/experimental_data/plots/attack_action_record_group_by_host.png')
         plt.show()
 
     def visualise_attack_operation(self):
