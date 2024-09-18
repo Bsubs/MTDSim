@@ -31,7 +31,7 @@ class MTDAIOperation:
         self.attack_operation = attack_operation
         self.adversary = adversary
         self.attacker_sensitivity = attacker_sensitivity
-        self.logging = False
+        self.logging = True
 
         self.security_metrics_record = security_metrics_record
         self._mtd_scheme = MTDScheme(network=network, scheme=scheme, mtd_trigger_interval=mtd_trigger_interval,
@@ -51,11 +51,11 @@ class MTDAIOperation:
             'SCAN_NEIGHBOR': 4,
             'EXPLOIT_VULN': 5,
             'BRUTE_FORCE': 6,
-            'CHECK_REACHABLE': 6, 
+            'CHECK_REACHABLE': 8, 
         }
         self.evaluation = Evaluation(network=network, adversary=adversary,  security_metrics_record = security_metrics_record)
 
-        self.attack_dict = {"SCAN_HOST": 1, "ENUM_HOST": 2, "SCAN_PORT": 3, "EXPLOIT_VULN": 4, "SCAN_NEIGHBOR": 5, "BRUTE_FORCE": 6, "CHECK_REACHABLE":6 }
+        self.attack_dict = {"SCAN_HOST": 1, "ENUM_HOST": 2, "SCAN_PORT": 3, "EXPLOIT_VULN": 4, "SCAN_NEIGHBOR": 5, "BRUTE_FORCE": 6, "CHECK_REACHABLE":8 }
 
 
 

@@ -314,7 +314,7 @@ class Evaluation:
         plt.xlabel('Time', weight='bold', fontsize=18)
         plt.ylabel('MTD Strategies', weight='bold', fontsize=18)
         fig.tight_layout()
-        plt.savefig(directory + '/experimental_data/plots/',+ '/mtd_record.png')
+        plt.savefig(directory + '/experimental_data/plots/mtd_record.png')
         plt.show()
 
 

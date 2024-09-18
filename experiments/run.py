@@ -514,13 +514,13 @@ def  execute_ai_model(start_time=0, finish_time=None, scheme='mtd_ai', mtd_inter
     custom_objects = {'mse': mse}
 
     
-    try:
-        main_network = legacy_h5_format.load_model_from_hdf5(model_path, custom_objects=custom_objects)  #For Mac
-        # print("On Mac")
+    # try:
+    #     main_network = legacy_h5_format.load_model_from_hdf5(model_path, custom_objects=custom_objects)  #For Mac
+    #     # print("On Mac")
     
-    except:
-        main_network = load_model(model_path, custom_objects=custom_objects)    #For Windows/Linux
-        # print("On Windows/Linux")
+    # except:
+    main_network = load_model(model_path, custom_objects=custom_objects)    #For Windows/Linux
+    # print("On Windows/Linux")
 
     main_network.compile(loss=MeanSquaredError(), optimizer=Adam())
 

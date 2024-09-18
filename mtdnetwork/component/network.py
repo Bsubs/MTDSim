@@ -84,12 +84,12 @@ class Network:
         self.assign_tag_priority()
         self.setup_users(self.users_to_nodes_ratio, self.prob_user_reuse_pass, constants.USER_TOTAL_FOR_EACH_HOST)
         self.gen_graph()
-        self.setup_network()
+        # self.setup_network()
         # self.draw()
         self.scorer.set_initial_statistics(self)
 
     def update_host_information(self):
-        """"
+        """
         Updates the host
         """
         for host_id in self.nodes:
@@ -431,6 +431,8 @@ class Network:
         # Updates Colour of target node to red
         if self.network_type == 0:
             self.colour_map[self.target_node] = "red"
+        
+        self.setup_network()
 
 
 
@@ -524,6 +526,14 @@ class Network:
 
     def get_target_node(self):
         return self.target_node
+    
+    def add_shortest_path(self):
+        """
+            Shortest Attack Path Variability (SAPV): changes on shortest attack paths over time
+        """
+        shortest_path = self.get_path_from_exposed(self.target_node, self.graph)[0]
+       
+        self.scorer.add_shortest_path(shortest_path)
 
     def add_attack_path_exposure(self):
         """
@@ -926,6 +936,7 @@ class Network:
     
     def get_target_node(self):
         return self.target_node
+    
 
     def is_compromised(self, compromised_hosts):
         """

@@ -23,30 +23,30 @@ class TimeNetwork(Network):
         self.last_mtd_triggered_time = 0
 
 
-    def setup_network(self):
-        """
-        Using the generated graph, generates a host for each node on the graph.
-        """
-        ip_addresses = []
+    # def setup_network(self):
+    #     """
+    #     Using the generated graph, generates a host for each node on the graph.
+    #     """
+    #     ip_addresses = []
 
-        for host_id in self.nodes:
-            node_os = Host.get_random_os()
-            node_os_version = Host.get_random_os_version(node_os)
-            node_ip = Host.get_random_address(existing_addresses=ip_addresses)
-            ip_addresses.append(node_ip)
-            self.graph.nodes[host_id]["host"] = Host(
-                node_os,
-                node_os_version,
-                host_id,
-                node_ip,
-                random.choices(self.users_list, k=self.users_per_host),
-                self,
-                self.service_generator
-            )
+    #     for host_id in self.nodes:
+    #         node_os = Host.get_random_os()
+    #         node_os_version = Host.get_random_os_version(node_os)
+    #         node_ip = Host.get_random_address(existing_addresses=ip_addresses)
+    #         ip_addresses.append(node_ip)
+    #         self.graph.nodes[host_id]["host"] = Host(
+    #             node_os,
+    #             node_os_version,
+    #             host_id,
+    #             node_ip,
+    #             random.choices(self.users_list, k=self.users_per_host),
+    #             self,
+    #             self.service_generator
+    #         )
 
     def is_compromised(self, compromised_hosts):
         # 80% compromise ratio
-        return len(compromised_hosts) / self.total_nodes > 0.25
+        return len(compromised_hosts) / self.total_nodes > 0.8
 
     def get_mtd_stats(self):
         return self._mtd_stats
