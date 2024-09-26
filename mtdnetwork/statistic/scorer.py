@@ -1,6 +1,7 @@
 # import mtdnetwork.irrelevant_stuff.exceptions as exceptions
 
 import numpy as np
+import logging
 class Statistics:
 
     def __init__(self, record_type):
@@ -211,6 +212,7 @@ class Scorer:
 
     def add_attack_path_exposure(self, score):
         self.attack_path_exposure.append(score)
+        logging.info(f"Added attack path exposure, new score: {self.attack_path_exposure}")
 
     def add_shortest_path(self, score):
         self.shortest_path_record.append(score)

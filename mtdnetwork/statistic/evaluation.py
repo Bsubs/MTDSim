@@ -8,6 +8,7 @@ import seaborn as sns
 directory = os.getcwd()
 
 
+
 class Evaluation:
     def __init__(self, network, adversary,  security_metrics_record):
 
@@ -133,6 +134,38 @@ class Evaluation:
 
     
         return result
+    
+    def get_simulation_summary_metrics(self):
+        """
+        Returns a dictionary of key metrics at the end of the simulation.
+        """
+        # Time to Compromise (Total time simulation ran)
+        total_time = self._attack_record['finish_time'].max() if len(self._attack_record) > 0 else 0
+
+        # Attack Success Rate
+        successful_count = self._adversary.successfulCount
+        unsuccessful_count = self._adversary.unsuccessfulCount
+        total_attacks = successful_count + unsuccessful_count
+        attack_success_rate = successful_count / total_attacks if total_attacks > 0 else 0
+
+        # Number of attacks stopped by MTD (Unsuccessful attacks)
+        mtd_stopped_attacks = unsuccessful_count
+
+        # MTD Execution Frequency
+        mtd_execution_freq = self.mtd_execution_frequency()
+
+        # Mean Time to Compromise (Average time per compromise)
+        total_compromised_hosts = self.compromised_num()
+        mean_time_to_compromise = total_time / total_compromised_hosts if total_compromised_hosts > 0 else 0
+
+        return {
+            'Total Time of Simulation (Time to Compromise)': total_time,
+            'Attack Success Rate': attack_success_rate,
+            'Number of Attacks MTD Stopped': mtd_stopped_attacks,
+            'Total Number of Attacks': total_attacks,
+            'MTD Execution Frequency': mtd_execution_freq,
+            'Mean Time to Compromise': mean_time_to_compromise
+        }
 
     def compromise_record_by_attack_action(self, action=None):
         """
@@ -351,3 +384,125 @@ class Evaluation:
         plt.legend()
         plt.savefig(directory + '/experimental_data/plots/risk.png')
         plt.show()
+        
+    def visualise_simulation_sim_metrics(self, results, scheme = 'None'):
+
+        # Convert the results array (list of dictionaries) into a DataFrame for easier plotting
+        df = pd.DataFrame(results)
+
+        # Set up the plotting style
+        sns.set(style="whitegrid")
+
+        # Define the number of simulations
+        num_iterations = len(results)
+        x_axis = range(1, num_iterations + 1)
+
+        # Create a large figure for multiple subplots
+        fig, axes = plt.subplots(3, 2, figsize=(18, 14))
+
+        # Adjust the layout of the subplots
+        fig.subplots_adjust(hspace=0.4, wspace=0.3)
+
+        # Generate a list of integer ticks for the x-axis
+        x_ticks = list(range(1, num_iterations + 1))
+
+        # Function to add a horizontal line showing the average value and the mean text
+        def plot_mean_line(ax, data, label):
+            mean_value = data.mean()
+            ax.axhline(mean_value, color='red', linestyle='--', label=f'Mean: {mean_value:.2f}')
+            ax.text(0.95, 0.95, f'Mean: {mean_value:.2f}', horizontalalignment='right', verticalalignment='top',
+                    transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='white', alpha=0.5))
+
+        # Plot each metric on its own subplot
+
+        # Total Time of Simulation (Time to Compromise)
+        axes[0, 0].plot(x_axis, df['Total Time of Simulation (Time to Compromise)'], marker='o', color='b')
+        plot_mean_line(axes[0, 0], df['Total Time of Simulation (Time to Compromise)'], 'Total Time')
+        axes[0, 0].set_title('Total Time of Simulation (Time to Compromise)', fontsize=14)
+        axes[0, 0].set_xlabel('Simulation Iteration', fontsize=12)
+        axes[0, 0].set_ylabel('Time (seconds)', fontsize=12)
+        axes[0, 0].set_xticks(x_axis)  # Only show whole numbers on x-axis
+
+        # Attack Success Rate
+        axes[0, 1].plot(x_axis, df['Attack Success Rate'], marker='o', color='g')
+        plot_mean_line(axes[0, 1], df['Attack Success Rate'], 'Attack Success Rate')
+        axes[0, 1].set_title('Attack Success Rate', fontsize=14)
+        axes[0, 1].set_xlabel('Simulation Iteration', fontsize=12)
+        axes[0, 1].set_ylabel('Success Rate', fontsize=12)
+        axes[0, 1].set_xticks(x_axis)  # Only show whole numbers on x-axis
+
+        # Number of Attacks MTD Stopped
+        axes[1, 0].plot(x_axis, df['Number of Attacks MTD Stopped'], marker='o', color='r')
+        plot_mean_line(axes[1, 0], df['Number of Attacks MTD Stopped'], 'MTD Stopped Attacks')
+        axes[1, 0].set_title('Number of Attacks MTD Stopped', fontsize=14)
+        axes[1, 0].set_xlabel('Simulation Iteration', fontsize=12)
+        axes[1, 0].set_ylabel('Number of Attacks', fontsize=12)
+        axes[1, 0].set_xticks(x_axis)  # Only show whole numbers on x-axis
+
+        # Total Number of Attacks
+        axes[1, 1].plot(x_axis, df['Total Number of Attacks'], marker='o', color='c')
+        plot_mean_line(axes[1, 1], df['Total Number of Attacks'], 'Total Attacks')
+        axes[1, 1].set_title('Total Number of Attacks', fontsize=14)
+        axes[1, 1].set_xlabel('Simulation Iteration', fontsize=12)
+        axes[1, 1].set_ylabel('Number of Attacks', fontsize=12)
+        axes[1, 1].set_xticks(x_axis)  # Only show whole numbers on x-axis
+
+        # MTD Execution Frequency
+        axes[2, 0].plot(x_axis, df['MTD Execution Frequency'], marker='o', color='m')
+        plot_mean_line(axes[2, 0], df['MTD Execution Frequency'], 'MTD Execution Frequency')
+        axes[2, 0].set_title('MTD Execution Frequency', fontsize=14)
+        axes[2, 0].set_xlabel('Simulation Iteration', fontsize=12)
+        axes[2, 0].set_ylabel('Frequency', fontsize=12)
+        axes[2, 0].set_xticks(x_axis)  # Only show whole numbers on x-axis
+
+        # Mean Time to Compromise
+        axes[2, 1].plot(x_axis, df['Mean Time to Compromise'], marker='o', color='y')
+        plot_mean_line(axes[2, 1], df['Mean Time to Compromise'], 'Mean Time to Compromise')
+        axes[2, 1].set_title('Mean Time to Compromise', fontsize=14)
+        axes[2, 1].set_xlabel('Simulation Iteration', fontsize=12)
+        axes[2, 1].set_ylabel('Mean Time (seconds)', fontsize=12)
+        axes[2, 1].set_xticks(x_axis)  # Only show whole numbers on x-axis
+
+
+        # Add an overall title for the figure
+        fig.suptitle('Simulation Results over Multiple Iterations with MTD Scheme: ' + scheme, fontsize=16, weight='bold')
+
+        # Show the plots
+        plt.show()
+        
+        
+    def somethiong(scheme, resultsPerScheme, num_iterations):
+
+        # Setup the style
+        sns.set(style="whitegrid")
+
+        # Assumed num_iterations might vary, define it as needed
+
+        # Get number of schemes
+        num_schemes = len(scheme)
+
+        # Define the ticks for the x-axis
+        x_ticks = np.linspace(1, num_iterations, min(10, num_iterations), dtype=int)
+
+        # Iterate over each metric to create a separate figure for each
+        metrics = ['Total Time of Simulation (Time to Compromise)', 'Attack Success Rate', 'Number of Attacks MTD Stopped', 'Total Number of Attacks', 'MTD Execution Frequency', 'Mean Time to Compromise']
+
+        for metric in metrics:
+            fig, axes = plt.subplots(1, num_schemes, figsize=(5 * num_schemes, 4), sharey='row')
+            fig.suptitle(f'Simulation Results for {metric}', fontsize=16, weight='bold')
+
+            # Plot each scheme's results in a subplot
+            for i, results in enumerate(resultsPerScheme):
+                # Convert the list of dictionaries to a DataFrame
+                df = pd.DataFrame(results)
+                axes[i].plot(range(1, num_iterations + 1), df[metric], marker='o', label=scheme[i])
+                axes[i].set_title(scheme[i])
+                axes[i].set_xlabel('Simulation Iteration')
+                if i == 0:
+                    axes[i].set_ylabel(metric)
+                axes[i].set_xticks(x_ticks)
+                axes[i].legend(loc='upper right')
+
+            plt.tight_layout()
+            # plt.savefig(f'{metric.replace(" ", "_").lower()}.png')  # Saving the figure as a PNG file
+            plt.show()

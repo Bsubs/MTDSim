@@ -31,7 +31,7 @@ class MTDAIOperation:
         self.attack_operation = attack_operation
         self.adversary = adversary
         self.attacker_sensitivity = attacker_sensitivity
-        self.logging = True
+        self.logging = False
 
         self.security_metrics_record = security_metrics_record
         self._mtd_scheme = MTDScheme(network=network, scheme=scheme, mtd_trigger_interval=mtd_trigger_interval,

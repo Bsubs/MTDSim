@@ -94,5 +94,6 @@ class CompleteTopologyShuffle(MTD):
         self.network.update_reachable_mtd()
         if self.network.get_network_type() == 0:
             self.network.add_attack_path_exposure()
+        self.network.add_shortest_path()
 
     

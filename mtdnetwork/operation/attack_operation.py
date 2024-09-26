@@ -30,6 +30,7 @@ class AttackOperation:
         self.targetIp = None
         self.targetNode = None
         self.interruptedAttackForRecycling = []
+        self.logging = False
 
 
     def proceed_attack(self):
@@ -41,7 +42,8 @@ class AttackOperation:
 
                 # Check if the target node is already compromised
                 if self.targetIp in self.adversary.compromisedIps:
-                    logging.info(f"Target IP {self.targetIp} is already compromised. Skipping to the next attack.")
+                    if self.logging:
+                        logging.info(f"Target IP {self.targetIp} is already compromised. Skipping to the next attack.")
                     self.move_to_next_attack()
                     return
 
@@ -70,8 +72,9 @@ class AttackOperation:
         for host_id, host in network.get_hosts().items():
             if host.get_ip() == self.targetIp:
                 self.targetNode = host_id
-                logging.info(f"Target IP {self.targetIp} found as host ID {self.targetNode}.")
-                logging.info(f"Neighbours of Target Ip are:{network.get_neighbors(self.targetNode)}")
+                if self.logging:
+                    logging.info(f"Target IP {self.targetIp} found as host ID {self.targetNode}.")
+                    logging.info(f"Neighbours of Target Ip are:{network.get_neighbors(self.targetNode)}")
                 return
         logging.warning(f"Target IP {self.targetIp} not found in the network. Ending attack sequence.")
         self.end_event.succeed()
@@ -79,36 +82,41 @@ class AttackOperation:
     def move_to_next_attack(self):
         self.currAttackIndex += 1
         self.currentAttack = None
-        
+        if self.logging:
+            logging.info(f"Attack Path exposure: {self.adversary.network.attack_path_exposure()}")
         if self.currAttackIndex < len(self.attackList):
 
             self.targetIp = self.attackList[self.currAttackIndex]
             self.set_target_node()
 
             if self.targetIp in self.adversary.compromisedIps:
-                logging.info(f"Target IP {self.targetIp} is already compromised. Checking Reachability status")
+                if self.logging:
+                    logging.info(f"Target IP {self.targetIp} is already compromised. Checking Reachability status")
                 self._check_reachable()
                 return
 
             self.adversary.set_curr_host_id(-1)
             self.adversary.set_curr_host(None)
-            logging.info('Adversary: Restarting with SCAN_HOST.')
+            if self.logging:
+                logging.info('Adversary: Restarting with SCAN_HOST.')
             self._scan_host()
         else:
             if self.adversary.recycle_attacks == True:
-                logging.info("Attack List completed, Adding Unsuccessful Attacks if any")
+                if self.logging:
+                    logging.info("Attack List completed, Adding Unsuccessful Attacks if any")
                 if len(self.interruptedAttackForRecycling) != 0:
-                    logging.info(f"Added Attacks to Attack List: {self.interruptedAttackForRecycling} ")
+                    if self.logging:
+                        logging.info(f"Added Attacks to Attack List: {self.interruptedAttackForRecycling} ")
                     self.attackList.extend(self.interruptedAttackForRecycling)
                     self.interruptedAttackForRecycling = []
                     self.currAttackIndex -= 1
                     self.move_to_next_attack()
                     return
-       
-            logging.info("All attacks in the attack dictionary have been completed.")
-            logging.info(f"Current Incomplete attacks: {self.interruptedAttackForRecycling}")
-            logging.info(f"Successful Attacks: {self.adversary.successfulAttack}")
-            logging.info(f"Unsuccessful Attacks: {self.adversary.interruptedAttacks}")
+            if self.logging:
+                logging.info("All attacks in the attack dictionary have been completed.")
+                logging.info(f"Current Incomplete attacks: {self.interruptedAttackForRecycling}")
+                logging.info(f"Successful Attacks: {self.adversary.successfulAttack}")
+                logging.info(f"Unsuccessful Attacks: {self.adversary.interruptedAttacks}")
             self.end_event.succeed()
 
 
@@ -120,7 +128,8 @@ class AttackOperation:
         """
         start_time = self.env.now + self._proceed_time
         try:
-            logging.info("Adversary: Start %s at %.1fs." % (self.adversary.get_curr_process(), start_time))
+            if self.logging:
+                logging.info("Adversary: Start %s at %.1fs." % (self.adversary.get_curr_process(), start_time))
             # Stop for the attack duration ie time
             yield self.env.timeout(time)
         # Execute attacks unless mtd raises an interrupt. then handle it (Stopped an attack)
@@ -130,7 +139,8 @@ class AttackOperation:
 
         # attack processed ready to attack now 
         finish_time = self.env.now + self._proceed_time
-        logging.info("Adversary: Processed %s at %.1fs." % (self.adversary.get_curr_process(), finish_time))
+        if self.logging:
+            logging.info("Adversary: Processed %s at %.1fs." % (self.adversary.get_curr_process(), finish_time))
         self.adversary.get_attack_stats().append_attack_operation_record(self.adversary.get_curr_process(), start_time,
                                                                          finish_time, self.adversary)
         # So the duration actually exists as a timeout for processing, the last thing we do is run the attack, which takes its own time. 
@@ -221,7 +231,8 @@ class AttackOperation:
         self.adversary.interruptedAttacks.append(current_attack)
         self.interruptedAttackForRecycling.append(self.targetIp)
         self.adversary.unsuccessfulCount += 1
-        logging.info(f"Attack {current_attack} thwarted by MTD at {self.env.now + self._proceed_time}s")
+        if self.logging:
+            logging.info(f"Attack {current_attack} thwarted by MTD at {self.env.now + self._proceed_time}s")
         # confusion penalty caused by MTD operation
         yield self.env.timeout(exponential_variates(ATTACK_DURATION['PENALTY'], 0.5))
         # If network based mtd then i need to start again and scan host etc
@@ -230,13 +241,15 @@ class AttackOperation:
             # Validate compromised list after MTD
             # self.validate_compromised_list_after_mtd()
             # Move on to the next attack
-            logging.info('Adversary: Moving to the next attack after network MTD.')
+            if self.logging:
+                logging.info('Adversary: Moving to the next attack after network MTD.')
             self.move_to_next_attack()
             
         # If not network based ie service diversity or something, applicaiton based oS diversity then i can just carry on but restart with scanning ports again
         elif self._interrupted_mtd.get_resource_type() == 'application':
             self._interrupted_mtd = None
-            logging.info('Adversary: Restarting with SCAN_PORT at %.1fs!' % (self.env.now + self._proceed_time))
+            if self.logging:
+                logging.info('Adversary: Restarting with SCAN_PORT at %.1fs!' % (self.env.now + self._proceed_time))
             self._scan_port()
             
     def validate_compromised_list_after_mtd(self):
@@ -261,9 +274,10 @@ class AttackOperation:
         # Update the adversary's list of compromised hosts and IPs
         self.adversary.set_compromised_hosts(new_compromised_hosts)
         self.adversary.compromisedIps = new_compromised_ips
-
-        logging.info(f"Updated Compromised Hosts after MTD: {new_compromised_hosts}")
-        logging.info(f"Updated Compromised IPs after MTD: {new_compromised_ips}")
+        
+        if self.logging:
+            logging.info(f"Updated Compromised Hosts after MTD: {new_compromised_hosts}")
+            logging.info(f"Updated Compromised IPs after MTD: {new_compromised_ips}")
 
 
     def _execute_scan_host(self):
@@ -326,7 +340,8 @@ class AttackOperation:
             self._enum_host()
         else:
             # terminate the whole process
-            logging.info("Adversary: Cannot discover new hosts!")
+            if self.logging:
+                logging.info("Adversary: Cannot discover new hosts!")
             self._check_reachable()
             return
 
@@ -355,8 +370,9 @@ class AttackOperation:
          # Check if the current host is already compromised and matches the target IP
         current_ip = adversary.get_curr_host().get_ip()
         if current_ip in self.adversary.compromisedIps and current_ip == self.targetIp:
-            logging.info(f"Current host IP {current_ip} is already compromised and is the target IP.")
-            logging.info(f"Target node {self.targetNode} has been reached. Marking attack as successful.")
+            if self.logging:
+                logging.info(f"Current host IP {current_ip} is already compromised and is the target IP.")
+                logging.info(f"Target node {self.targetNode} has been reached. Marking attack as successful.")
             self.add_successful_attack()
             self.move_to_next_attack()
             return
@@ -402,7 +418,8 @@ class AttackOperation:
         if adversary.get_curr_host() == None:
             self.adversary.set_curr_host_id(-1)
             self.adversary.set_curr_host(None)
-            logging.info('Adversary: No Host Set in Port Scan -- Restarting with SCAN_HOST.')
+            if self.logging:
+                logging.info('Adversary: No Host Set in Port Scan -- Restarting with SCAN_HOST.')
             self._scan_host()
             return
         
@@ -431,7 +448,8 @@ class AttackOperation:
             start_time = self.env.now + self._proceed_time
             try:
                 # All logging happens inside this function. 
-                logging.info(
+                if self.logging:
+                    logging.info(
                     "Adversary: Start %s %s on host %s at %.1fs." % (self.adversary.get_curr_process(), vuln.id,
                                                                      self.adversary.get_curr_host_id(), start_time))
                 yield self.env.timeout(exploit_time)
@@ -439,7 +457,8 @@ class AttackOperation:
                 self.env.process(self._handle_interrupt(start_time, self.adversary.get_curr_process()))
                 return
             finish_time = self.env.now + self._proceed_time
-            logging.info(
+            if self.logging:
+                logging.info(
                 "Adversary: Processed %s %s on host %s at %.1fs." % (self.adversary.get_curr_process(), vuln.id,
                                                                      self.adversary.get_curr_host_id(), finish_time))
             self.adversary.get_attack_stats().append_attack_operation_record(self.adversary.get_curr_process(),
@@ -456,6 +475,7 @@ class AttackOperation:
                         if vuln.exploitability > 1:
                             vuln.exploitability = 1
                         # todo: record vulnerability roa, impact, and complexity
+                        self.adversary.get_network().get_scorer().add_vuln_compromise(self.env.now, vuln)
                         # self.scorer.add_vuln_compromise(self.curr_time, vuln)
             self.update_compromise_progress(self.env.now, self._proceed_time, self._scan_neighbors)
             
@@ -517,7 +537,8 @@ class AttackOperation:
         
         # Check if the target node is among the compromised hosts
         if self.targetNode not in compromised_hosts:
-            logging.info(f"Target node {self.targetNode} is not compromised yet.")
+            if self.logging:
+                logging.info(f"Target node {self.targetNode} is not compromised yet.")
             self._scan_host()
             return
         
@@ -547,14 +568,17 @@ class AttackOperation:
                     visited.add(neighbor)
         
         if found_path:
-            logging.info(f"Path to target node {self.targetNode} found through compromised nodes.")
+            if self.logging:
+                logging.info(f"Path to target node {self.targetNode} found through compromised nodes.")
             self.add_successful_attack()
             self.move_to_next_attack()
         else:
-            logging.info(f"Target node {self.targetNode} is compromised but unreachable. Initiating scan to continue.")
+            if self.logging:
+                logging.info(f"Target node {self.targetNode} is compromised but unreachable. Initiating scan to continue.")
             self.adversary.set_curr_host_id(-1)
             self.adversary.set_curr_host(None)
-            logging.info('Adversary: Restarting with SCAN_HOST to Search for Compromised Target Node.')
+            if self.logging:
+                logging.info('Adversary: Restarting with SCAN_HOST to Search for Compromised Target Node.')
             self._scan_host()
 
     def _set_next_pivot_host(self):
@@ -581,13 +605,15 @@ class AttackOperation:
         if adversary.get_curr_host_id() not in adversary.get_compromised_hosts():
             adversary.get_compromised_hosts().append(adversary.get_curr_host_id())
             self.adversary.compromisedIps.append(adversary.network.get_host(adversary.get_curr_host_id()).get_ip())
-            logging.info("Current Compromised Hosts: ")
-            logging.info(adversary.get_compromised_hosts())
-            logging.info("Current Compromised IP addresses: ")
-            logging.info(self.adversary.compromisedIps)
+            if self.logging:
+                logging.info("Current Compromised Hosts: ")
+                logging.info(adversary.get_compromised_hosts())
+                logging.info("Current Compromised IP addresses: ")
+                logging.info(self.adversary.compromisedIps)
             
             adversary.get_attack_stats().update_compromise_host(adversary.curr_host)
-            logging.info(
+            if self.logging:
+                logging.info(
                 "Adversary: Host %i has been compromised at %.1fs!" % (
                     adversary.get_curr_host_id(), now + proceed_time))
             adversary.get_network().update_reachable_compromise(
@@ -601,7 +627,8 @@ class AttackOperation:
 
             # Check if the compromised host is the target node
             if adversary.get_curr_host_id() == self.targetNode:
-                logging.info(f"Target node {self.targetNode} has been compromised!")
+                if self.logging:
+                    logging.info(f"Target node {self.targetNode} has been compromised!")
                 self.adversary.compromisedIps.append(self.targetIp)
                 self.add_successful_attack()
                 self.move_to_next_attack()
