@@ -33,6 +33,7 @@ class Vulnerability:
         self.has_dependent_vulns = random.random() < constants.VULN_PROB_DEPENDS_ON_OTHER_VULNS
         self.dependent_vuln_id = random.choice(
             [x for x in range(0, 101, int(100 * constants.VULN_PROB_DEPENDS_ON_OTHER_VULNS))])
+         
         self.dependent_vulns = []
 
         self.id = str(uuid.uuid4())
@@ -42,6 +43,8 @@ class Vulnerability:
                 self.has_os_dependency = True
                 self.vuln_os_list = random.sample(os_list, k=random.randint(1, len(os_list) - 1))
                 # self.vuln_os_list = random.sample(os_list, k=random.randint(1, 2))
+    
+
 
     def is_exploited(self):
         return self.exploited
@@ -103,8 +106,8 @@ class Vulnerability:
         self.exploit_attempt += 1
         if random.random() < self.complexity:
             self.exploited = True
-            if self.has_os_dependency:
-                self.logger.info("OS DEPENDENT VULNERABILITY EXPLOITED!")
+            # if self.has_os_dependency:
+                # self.logger.info("OS DEPENDENT VULNERABILITY EXPLOITED!")
             return self.impact
         return 0.0
 
@@ -139,6 +142,23 @@ class Vulnerability:
         The x100 is because impact is expressed as a value 1-10 on CVE
         """
         return (self.complexity * self.impact) / self.exploit_time()
+    
+    def risk(self):
+        """
+        Psuedo risk of this vulnerability.
+        
+        Risk is defined as the product of the likelihood of exploitation and the impact.
+        The likelihood can be adjusted based on exploit attempts and other factors if needed.
+
+        Purpose: Measures the potential danger or threat posed by a vulnerability from the defender's perspective.
+
+        Returns:
+            The calculated risk value.
+        """
+        likelihood = self.complexity  # Likelihood of exploitation is based on complexity
+        impact = self.impact  # Impact value
+        
+        return likelihood * impact
 
     def initial_roa(self):
         return (self.complexity * self.impact) / (constants.VULN_MIN_EXPLOIT_TIME +
@@ -192,6 +212,19 @@ class Service:
                    for v in self.vulnerabilities
                    if v.roa() > roa_threshold and not v.is_exploited()
                ][:constants.SERVICE_TOP_X_VULNS_TO_RETURN]
+    
+        
+    # def get_vulns_risk(self, risk_threshold=0):
+    #     """
+    #     Returns:
+    #         the top X vulnerabilities in terms of Risk of the service that have not been exploited yet
+    #     """
+    #     return [
+    #                v
+    #                for v in self.vulnerabilities
+    #                if v.risk() > risk_threshold and not v.is_exploited()
+    #            ][:constants.SERVICE_TOP_X_VULNS_TO_RETURN]
+ 
 
     def get_all_vulns(self):
         return self.vulnerabilities

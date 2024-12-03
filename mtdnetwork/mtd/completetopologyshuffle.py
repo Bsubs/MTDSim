@@ -1,5 +1,5 @@
 from mtdnetwork.mtd import MTD
-
+from mtdnetwork.component import host
 
 class CompleteTopologyShuffle(MTD):
     """
@@ -24,7 +24,16 @@ class CompleteTopologyShuffle(MTD):
         # Update Attack Path Exposure for target networks
         if self.network.get_network_type() == 0:
             self.network.add_attack_path_exposure()
+        self.network.add_shortest_path()
 
         # Set nHosts per layer
         # Generate new graph with those number of hosts per layer
         # Replace the new nodes with the old host instances
+
+        ip_addresses = []
+        for host_id, host_instance in hosts.items():
+            host_ip = host_instance.ip
+            ip_addresses.append(host_ip)
+        #update the new ip addresses
+        self.network.update_current_hosts_ip(ip_addresses)
+   
